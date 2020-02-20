@@ -71,6 +71,7 @@ public class BluetoothLeService extends Service {
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            Log.v(TAG, "onConnectionStateChange");
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
@@ -91,6 +92,7 @@ public class BluetoothLeService extends Service {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            Log.v(TAG, "onServicesDiscovered");
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
@@ -102,6 +104,7 @@ public class BluetoothLeService extends Service {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
+            Log.v(TAG, "onCharacteristicRead");
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
@@ -110,17 +113,20 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
+            Log.v(TAG, "onCharacteristicChanged");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };
 
     private void broadcastUpdate(final String action) {
+        Log.v(TAG, "broadcastUpdate");
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
 
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
+        Log.v(TAG, "broadcastUpdate");
         final Intent intent = new Intent(action);
 
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
@@ -154,17 +160,20 @@ public class BluetoothLeService extends Service {
 
     public class LocalBinder extends Binder {
         BluetoothLeService getService() {
+            Log.v(TAG, "getService");
             return BluetoothLeService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.v(TAG, "onBind");
         return mBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.v(TAG, "onUnbind");
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
@@ -180,6 +189,7 @@ public class BluetoothLeService extends Service {
      * @return Return true if the initialization is successful.
      */
     public boolean initialize() {
+        Log.v(TAG, "initialize");
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
         if (mBluetoothManager == null) {
@@ -210,6 +220,7 @@ public class BluetoothLeService extends Service {
      *         callback.
      */
     public boolean connect(final String address) {
+        Log.v(TAG, "connect");
         if (mBluetoothAdapter == null || address == null) {
             Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
@@ -248,6 +259,7 @@ public class BluetoothLeService extends Service {
      * callback.
      */
     public void disconnect() {
+        Log.v(TAG, "disconnect");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -260,6 +272,7 @@ public class BluetoothLeService extends Service {
      * released properly.
      */
     public void close() {
+        Log.v(TAG, "close");
         if (mBluetoothGatt == null) {
             return;
         }
@@ -275,6 +288,7 @@ public class BluetoothLeService extends Service {
      * @param characteristic The characteristic to read from.
      */
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        Log.v(TAG, "readCharacteristic");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -290,6 +304,7 @@ public class BluetoothLeService extends Service {
      */
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
                                               boolean enabled) {
+        Log.v(TAG, "setCharacteristicNotification");
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
@@ -312,6 +327,7 @@ public class BluetoothLeService extends Service {
      * @return A {@code List} of supported services.
      */
     public List<BluetoothGattService> getSupportedGattServices() {
+        Log.v(TAG, "getSupportedGattServices");
         if (mBluetoothGatt == null) return null;
 
         return mBluetoothGatt.getServices();

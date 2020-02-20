@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +43,8 @@ import java.util.ArrayList;
  * Activity for scanning and displaying available Bluetooth LE devices.
  */
 public class DeviceScanActivity extends ListActivity {
+    private final static String TAG = DeviceScanActivity.class.getSimpleName();
+
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
@@ -53,6 +56,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.v(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         getActionBar().setTitle(R.string.title_devices);
         mHandler = new Handler();
@@ -80,6 +84,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.v(TAG, "onCreateOptionsMenu");
         getMenuInflater().inflate(R.menu.main, menu);
         if (!mScanning) {
             menu.findItem(R.id.menu_stop).setVisible(false);
@@ -96,6 +101,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.v(TAG, "onOptionsItemSelected");
         switch (item.getItemId()) {
             case R.id.menu_scan:
                 mLeDeviceListAdapter.clear();
@@ -110,6 +116,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onResume() {
+        Log.v(TAG, "onResume");
         super.onResume();
 
         // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
@@ -127,6 +134,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.v(TAG, "onActivityResult");
         // User chose not to enable Bluetooth.
         if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
             finish();
@@ -137,6 +145,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onPause() {
+        Log.v(TAG, "onPause");
         super.onPause();
         scanLeDevice(false);
         mLeDeviceListAdapter.clear();
@@ -144,6 +153,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
+        Log.v(TAG, "onListItemClick");
         final BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
         if (device == null) return;
         final Intent intent = new Intent(this, DeviceControlActivity.class);
@@ -157,6 +167,7 @@ public class DeviceScanActivity extends ListActivity {
     }
 
     private void scanLeDevice(final boolean enable) {
+        Log.v(TAG, "scanLeDevice");
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
@@ -184,41 +195,49 @@ public class DeviceScanActivity extends ListActivity {
 
         public LeDeviceListAdapter() {
             super();
+            Log.v(TAG, "LeDeviceListAdapter");
             mLeDevices = new ArrayList<BluetoothDevice>();
             mInflator = DeviceScanActivity.this.getLayoutInflater();
         }
 
         public void addDevice(BluetoothDevice device) {
-            if(!mLeDevices.contains(device)) {
+            Log.v(TAG, "addDevice");
+            if (!mLeDevices.contains(device)) {
                 mLeDevices.add(device);
             }
         }
 
         public BluetoothDevice getDevice(int position) {
+            Log.v(TAG, "getDevice");
             return mLeDevices.get(position);
         }
 
         public void clear() {
+            Log.v(TAG, "clear");
             mLeDevices.clear();
         }
 
         @Override
         public int getCount() {
+            Log.v(TAG, "getCount");
             return mLeDevices.size();
         }
 
         @Override
         public Object getItem(int i) {
+            Log.v(TAG, "getItem");
             return mLeDevices.get(i);
         }
 
         @Override
         public long getItemId(int i) {
+            Log.v(TAG, "getItemId");
             return i;
         }
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
+            Log.v(TAG, "getView");
             ViewHolder viewHolder;
             // General ListView optimization code.
             if (view == null) {
@@ -247,17 +266,18 @@ public class DeviceScanActivity extends ListActivity {
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
 
-        @Override
-        public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-            runOnUiThread(new Runnable() {
                 @Override
-                public void run() {
-                    mLeDeviceListAdapter.addDevice(device);
-                    mLeDeviceListAdapter.notifyDataSetChanged();
+                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.v(TAG, "mLeScanCallback");
+                            mLeDeviceListAdapter.addDevice(device);
+                            mLeDeviceListAdapter.notifyDataSetChanged();
+                        }
+                    });
                 }
-            });
-        }
-    };
+            };
 
     static class ViewHolder {
         TextView deviceName;
